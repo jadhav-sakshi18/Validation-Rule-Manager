@@ -1,4 +1,6 @@
+/* ============================= */
 /* Global Reset & Theme Variables */
+/* ============================= */
 :root {
   --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   --panel-bg: #ffffff;
@@ -6,13 +8,22 @@
   --text-muted: #475569;
   --primary: #4f46e5;
   --primary-hover: #4338ca;
-  --danger: #ef4444;
-  --danger-hover: #dc2626;
   --border-color: #e2e8f0;
+
   --success-bg: #dcfce7;
   --success-text: #166534;
+
   --error-bg: #fee2e2;
   --error-text: #991b1b;
+
+  --radius: 12px;
+}
+
+/* ============================= */
+/* Base Reset */
+/* ============================= */
+* {
+  box-sizing: border-box;
 }
 
 body {
@@ -24,77 +35,78 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Container Layout */
+/* ============================= */
+/* Layout */
+/* ============================= */
 .container {
   max-width: 1140px;
   margin: 0 auto;
   padding: 40px 20px;
 }
 
+/* ============================= */
 /* Typography */
+/* ============================= */
 h1 {
   text-align: center;
-  color: var(--text-main);
-  font-size: 2.25rem;
+  font-size: 2.3rem;
   font-weight: 800;
-  letter-spacing: -0.025em;
-  margin-bottom: 32px;
+  margin-bottom: 30px;
 }
 
 h2 {
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   font-weight: 700;
-  color: var(--text-main);
-  margin-top: 0;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
-/* Dashboard Panels */
+/* ============================= */
+/* Panels */
+/* ============================= */
 .panel {
   background: var(--panel-bg);
-  padding: 28px;
-  border-radius: 16px;
-  margin-bottom: 24px;
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.03);
+  padding: 26px;
+  border-radius: var(--radius);
+  margin-bottom: 20px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.panel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.06);
 }
 
 .panel p {
-  margin: 8px 0;
+  margin: 6px 0;
   color: var(--text-muted);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }
 
-.panel p b {
-  color: var(--text-main);
-  font-weight: 600;
-}
-
-/* Action Rows & Toolbars */
+/* ============================= */
+/* Actions */
+/* ============================= */
 .actions {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
   margin-bottom: 20px;
 }
 
-.panel .actions {
-  margin-bottom: 24px;
-}
-
-/* Premium Button Styling */
+/* ============================= */
+/* Buttons */
+/* ============================= */
 button {
-  font-family: inherit;
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   font-weight: 600;
-  border: 1px solid transparent;
-  padding: 10px 18px;
+  padding: 9px 16px;
   border-radius: 8px;
+  border: none;
   cursor: pointer;
   background: var(--primary);
   color: white;
   transition: all 0.2s ease;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 button:hover {
@@ -103,194 +115,279 @@ button:hover {
 }
 
 button:active {
-  transform: translateY(0);
-}
-
-/* Destructive / Secondary Actions */
-button:has-text("Logout"), 
-button[onClick*="logout"] {
-  background: #f1f5f9;
-  color: var(--text-muted);
-  border: 1px solid var(--border-color);
-}
-
-button:has-text("Logout"):hover,
-button[onClick*="logout"]:hover {
-  background: #e2e8f0;
-  color: var(--text-main);
+  transform: scale(0.97);
 }
 
 button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  transform: none !important;
+  transform: none;
 }
 
-/* Login Center Card */
+/* Logout Button */
+button.logout {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+button.logout:hover {
+  background: #fecaca;
+  color: #7f1d1d;
+}
+
+
 .login-container {
-  height: 60vh;
+  height: 90vh;
   display: flex;
   justify-content: center;
   align-items: center;
+  position: relative;
+  overflow: hidden;
 }
 
+/* Background glow layers */
+.login-container::before,
+.login-container::after {
+  content: "";
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.5;
+}
+
+.login-container::before {
+  background: #6366f1;
+  top: -100px;
+  left: -100px;
+}
+
+.login-container::after {
+  background: #22c55e;
+  bottom: -100px;
+  right: -100px;
+}
+
+/* Card */
 .login-card {
-  padding: 40px;
-  background: var(--panel-bg);
-  border-radius: 16px;
+  position: relative;
+  z-index: 2;
+  padding: 42px 34px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
   text-align: center;
-  max-width: 400px;
   width: 100%;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  border: 1px solid var(--border-color);
+  max-width: 420px;
+
+  border: 1px solid rgba(255,255,255,0.4);
+  box-shadow: 0 30px 70px rgba(0,0,0,0.15);
+
+  transition: all 0.3s ease;
 }
 
+.login-card:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 40px 80px rgba(0,0,0,0.18);
+}
+
+
+/* Floating animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+/* Title */
+.login-card h2 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+/* Subtitle */
+.login-subtitle {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 28px;
+}
+
+/* Button */
 .login-btn {
-  background: #0070d2; /* Salesforce Blue */
-  padding: 12px 24px;
-  font-size: 1rem;
+  background: linear-gradient(135deg, #0070d2, #005fb2);
+  padding: 13px;
   width: 100%;
-  margin-top: 10px;
-}
-.login-btn:hover {
-  background: #005fb2;
+  font-size: 1rem;
+  border-radius: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 25px rgba(0,112,210,0.3);
 }
 
-/* Elegant Modern Table */
+.login-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 35px rgba(0,112,210,0.45);
+}
+
+/* Divider */
+.login-divider {
+  margin: 22px 0 10px;
+  position: relative;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.login-divider::before,
+.login-divider::after {
+  content: "";
+  position: absolute;
+  height: 1px;
+  width: 30%;
+  background: var(--border-color);
+  top: 50%;
+}
+
+.login-divider::before {
+  left: 0;
+}
+
+.login-divider::after {
+  right: 0;
+}
+
+/* Footer */
+.login-footer {
+  margin-top: 10px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  opacity: 0.8;
+}
+
+/* Footer text */
+.login-footer {
+  margin-top: 16px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* ============================= */
+/* Table */
+/* ============================= */
 table {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  margin-top: 8px;
+  border-collapse: collapse;
 }
 
 th {
-  background: #f8fafc;
-  color: var(--text-muted);
-  font-weight: 700;
-  text-transform: uppercase;
   font-size: 0.75rem;
-  letter-spacing: 0.05em;
-  padding: 14px 16px;
+  text-transform: uppercase;
+  color: var(--text-muted);
   text-align: left;
+  padding: 12px;
   border-bottom: 2px solid var(--border-color);
 }
 
-th:first-child { border-top-left-radius: 8px; }
-th:last-child { border-top-right-radius: 8px; }
-
 td {
-  padding: 16px;
+  padding: 14px 12px;
   border-bottom: 1px solid var(--border-color);
-  color: var(--text-muted);
-  font-size: 0.925rem;
-  vertical-align: middle;
+  font-size: 0.9rem;
 }
 
-tr:last-child td {
-  border-bottom: none;
+tr {
+  transition: background 0.2s ease;
 }
 
-tr:hover td {
+tr:hover {
   background: #f8fafc;
-  color: var(--text-main);
 }
 
-/* Status Badges */
+/* ============================= */
+/* Badge */
+/* ============================= */
 .badge {
-  display: inline-flex;
-  align-items: center;
   padding: 4px 10px;
-  border-radius: 9999px;
-  font-size: 0.75rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
 }
 
 .badge.active {
-  background-color: var(--success-bg);
+  background: var(--success-bg);
   color: var(--success-text);
 }
 
 .badge.inactive {
-  background-color: var(--error-bg);
+  background: var(--error-bg);
   color: var(--error-text);
 }
 
-/* Custom Toggle Switch (On/Off Switch instead of Toggle Button) */
+/* ============================= */
+/* Toggle Switch (FIXED) */
+/* ============================= */
 .switch {
   position: relative;
   display: inline-block;
-  width: 44px;
-  height: 24px;
+  width: 40px;
+  height: 22px;
 }
 
-/* Hide default HTML checkbox */
+/* Hide checkbox but keep clickable */
 .switch input {
+  position: absolute;
   opacity: 0;
   width: 0;
   height: 0;
 }
 
-/* The Slider Track */
+/* Track */
 .slider {
   position: absolute;
+  inset: 0;
+  background: #cbd5e1;
+  border-radius: 999px;
   cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #cbd5e1; /* Inactive track (slate-300) */
-  transition: .3s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: 24px;
+  transition: 0.3s;
 }
 
-/* The Sliding Knob */
-.slider:before {
-  position: absolute;
+/* Knob */
+.slider::before {
   content: "";
+  position: absolute;
   height: 18px;
   width: 18px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: .3s cubic-bezier(0.4, 0, 0.2, 1);
+  left: 2px;
+  bottom: 2px;
+  background: white;
   border-radius: 50%;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  transition: 0.3s;
 }
 
-/* On / Active State Background */
+/* Active */
 .switch input:checked + .slider {
-  background-color: var(--primary); /* Deep Indigo */
+  background: var(--primary);
 }
 
-/* Move the Knob over when Checked */
-.switch input:checked + .slider:before {
-  transform: translateX(20px);
+.switch input:checked + .slider::before {
+  transform: translateX(18px);
 }
 
-/* Focus outline for accessibility */
-.switch input:focus-visible + .slider {
-  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px var(--primary);
-}
-
-/* Global Application Status Messages */
+/* ============================= */
+/* Messages */
+/* ============================= */
 .message {
-  margin: 16px 0;
-  padding: 14px 20px;
-  background: #f0fdf4;
+  margin: 15px 0;
+  padding: 12px 16px;
   border-left: 4px solid #16a34a;
-  color: #14532d;
-  border-radius: 4px 8px 8px 4px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  background: #f0fdf4;
+  border-radius: 6px;
+  font-size: 0.85rem;
 }
 
-/* Loading Overrides */
 .message.status-loading {
   background: #f0f9ff;
   border-left-color: #0284c7;
-  color: #0c4a6e;
 }

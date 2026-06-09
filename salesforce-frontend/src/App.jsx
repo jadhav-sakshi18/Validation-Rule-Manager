@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import "./App.css";
+import Login from "./components/Login";
 
-const API_BASE = import.meta.env.VITE_API_BASE;
+
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
 
 function App() {
   const [status, setStatus] = useState({ loggedIn: false, user: null });
@@ -10,115 +12,108 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  // Changed rules detection
   const changedRules = useMemo(() => {
-    return rules.filter((r) => {
-      const original = originalRules.find((o) => o.Id === r.Id);
-      return original && original.Active !== r.Active;
+    return rules.filter((rule) => {
+      const original = originalRules.find((r) => r.Id === rule.Id);
+      return original && original.Active !== rule.Active;
     });
   }, [rules, originalRules]);
 
-  // STATUS
+  async function fetchJSON(url, options = {}) {
+    const response = await fetch(url, options);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || "Request failed");
+    return data;
+  }
+
   async function checkStatus() {
     try {
-      const res = await fetch(`${API_BASE}/status`);
-      const data = await res.json();
+      const data = await fetchJSON(`${API_BASE}/status`);
       setStatus(data);
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
     }
   }
 
-  // LOGIN
   function login() {
     window.location.href = `${API_BASE}/login`;
   }
 
-  // LOGOUT
   async function logout() {
-    await fetch(`${API_BASE}/logout`);
-    setStatus({ loggedIn: false, user: null });
-    setRules([]);
-    setOriginalRules([]);
-    setMessage("");
+    try {
+      await fetch(`${API_BASE}/logout`);
+    } finally {
+      setStatus({ loggedIn: false, user: null });
+      setRules([]);
+      setOriginalRules([]);
+      setMessage("");
+    }
   }
 
-  // GET RULES
   async function getRules() {
     setLoading(true);
     setMessage("");
 
     try {
-      const res = await fetch(`${API_BASE}/validation-rules`);
-      const data = await res.json();
-
-      if (!res.ok) throw new Error(data.message || "Failed to load rules");
-
+      const data = await fetchJSON(`${API_BASE}/validation-rules`);
       setRules(data.records);
-      setOriginalRules(JSON.parse(JSON.stringify(data.records))); // Deep copy
+      setOriginalRules(structuredClone(data.records));
       setMessage(`Loaded ${data.records.length} rules`);
-    } catch (err) {
-      setMessage(err.message);
+    } catch (error) {
+      setMessage(error.message);
     } finally {
       setLoading(false);
     }
   }
 
-  // TOGGLE
   function toggleRule(id) {
     setRules((prev) =>
-      prev.map((r) => (r.Id === id ? { ...r, Active: !r.Active } : r))
+      prev.map((rule) =>
+        rule.Id === id ? { ...rule, Active: !rule.Active } : rule
+      )
     );
   }
 
-  // ENABLE ALL
   function enableAll() {
-    setRules((prev) => prev.map((r) => ({ ...r, Active: true })));
+    setRules((prev) => prev.map((rule) => ({ ...rule, Active: true })));
   }
 
-  // DISABLE ALL
   function disableAll() {
-    setRules((prev) => prev.map((r) => ({ ...r, Active: false })));
+    setRules((prev) => prev.map((rule) => ({ ...rule, Active: false })));
   }
 
-  // ROLLBACK
   function rollback() {
-    setRules(JSON.parse(JSON.stringify(originalRules)));
+    setRules(structuredClone(originalRules));
     setMessage("Rolled back changes");
   }
 
-  // DEPLOY
   async function deployChanges() {
     setLoading(true);
     setMessage("");
 
     try {
-      const promises = changedRules.map(async (rule) => {
-        const entityName = rule.EntityDefinition?.QualifiedApiName;
-        const fullName = entityName ? `${entityName}.${rule.ValidationName}` : rule.ValidationName;
+      await Promise.all(
+        changedRules.map(async (rule) => {
+          const entity = rule.EntityDefinition?.QualifiedApiName;
+          const fullName = entity
+            ? `${entity}.${rule.ValidationName}`
+            : rule.ValidationName;
 
-        const res = await fetch(`${API_BASE}/validation-rules/${rule.Id}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
-            active: rule.Active,
-            fullName: fullName,
-            errorConditionFormula: rule.ErrorConditionFormula, // Re-submitting payload
-            errorMessage: rule.ErrorMessage,
-            errorDisplayField: rule.ErrorDisplayField,
-            description: rule.Description
-          }),
-        });
-        
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || `Error updating rule ${rule.ValidationName}`);
-      });
+          await fetchJSON(`${API_BASE}/validation-rules/${rule.Id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              active: rule.Active,
+              fullName,
+            }),
+          });
+        })
+      );
 
-      await Promise.all(promises);
       await getRules();
       setMessage("Changes deployed successfully!");
-    } catch (err) {
-      setMessage(err.message);
+    } catch (error) {
+      setMessage(error.message);
     } finally {
       setLoading(false);
     }
@@ -133,21 +128,15 @@ function App() {
       <h1>Salesforce Validation Rule Manager</h1>
 
       {!status.loggedIn ? (
-        <div className="login-container">
-          <div className="login-card">
-            <h2>Login Required</h2>
-            <button className="login-btn" onClick={login}>
-              Login with Salesforce
-            </button>
-          </div>
-        </div>
+        <Login onLogin={login} />
       ) : (
         <div className="panel">
-          <p><b>User:</b> {status.user?.username || "Connected Account"}</p>
-          <p><b>Instance/Org:</b> {status.instanceUrl}</p>
+          <p><b>User:</b> {status.user?.username}</p>
+          <p><b>Org:</b> {status.user?.organizationName}</p>
+          <p><b>Instance:</b> {status.instanceUrl}</p>
 
           <div className="actions">
-            <button onClick={logout}>Logout</button>
+            <button className="logout" onClick={logout}>Logout</button>
             <button onClick={getRules}>Load Rules</button>
           </div>
         </div>
@@ -157,56 +146,54 @@ function App() {
       {message && <p className="message">{message}</p>}
 
       {rules.length > 0 && (
-        <div className="panel">
-          <div className="actions">
-            <button onClick={enableAll}>Enable All</button>
-            <button onClick={disableAll}>Disable All</button>
-            <button onClick={rollback}>Rollback</button>
-            <button 
-              onClick={deployChanges} 
-              disabled={changedRules.length === 0}
-              style={{ opacity: changedRules.length === 0 ? 0.5 : 1 }}
-            >
-              Deploy ({changedRules.length})
-            </button>
-          </div>
+  <div className="panel">
+    <div className="actions">
+      <button onClick={enableAll}>Enable All</button>
+      <button onClick={disableAll}>Disable All</button>
+      <button onClick={rollback}>Rollback</button>
+      <button onClick={deployChanges} disabled={!changedRules.length}>
+        Deploy ({changedRules.length})
+      </button>
+    </div>
 
-          <table>
-            <thead>
-              <tr>
-                <th>Rule</th>
-                <th>Object</th>
-                <th>State</th>
-                <th>Toggle</th>
-              </tr>
-            </thead>
+    <table>
+      <thead>
+        <tr>
+          <th>Rule</th>
+          <th>Object</th>
+          <th>Status</th>
+          <th>Toggle</th>
+        </tr>
+      </thead>
 
-            <tbody>
-              {rules.map((rule) => (
-                <tr key={rule.Id}>
-                  <td>{rule.ValidationName}</td>
-                  <td>{rule.EntityDefinition?.QualifiedApiName || "Global"}</td>
-                  <td>
-  <span className={`badge ${rule.Active ? "active" : "inactive"}`}>
-    {rule.Active ? "Active" : "Inactive"}
-  </span>
-</td>
-                  <td>
-  <label className="switch" title={rule.Active ? "Deactivate Rule" : "Activate Rule"}>
-    <input 
-      type="checkbox" 
-      checked={rule.Active} 
-      onChange={() => toggleRule(rule.Id)} 
-    />
-    <span className="slider"></span>
-  </label>
-</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <tbody>
+        {rules.map((rule) => (
+          <tr key={rule.Id}>
+            <td>{rule.ValidationName}</td>
+            <td>{rule.EntityDefinition?.QualifiedApiName}</td>
+
+            <td>
+              <span className={`badge ${rule.Active ? "active" : "inactive"}`}>
+                {rule.Active ? "Active" : "Inactive"}
+              </span>
+            </td>
+
+            <td>
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  checked={rule.Active}
+                  onChange={() => toggleRule(rule.Id)}
+                />
+                <span className="slider"></span>
+              </label>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)}
     </div>
   );
 }
