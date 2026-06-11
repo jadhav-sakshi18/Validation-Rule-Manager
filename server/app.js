@@ -38,4 +38,7 @@ app.get("/logout", authController.logout);
 app.get("/validation-rules", ruleController.fetchRules);
 app.patch("/validation-rules/:id", ruleController.patchRule);
 
-app.listen(5000);
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
