@@ -1,14 +1,15 @@
 const { getRules, updateRule } = require("../services/ruleService");
-const { getSession } = require("../utils/session");
 
 // GET RULES
 const fetchRules = async (req, res) => {
   try {
-    if (!getSession().accessToken) {
+    const session = req.session.salesforce;
+
+    if (!session?.accessToken) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const rules = await getRules();
+    const rules = await getRules(session);
     res.json({ records: rules });
   } catch (err) {
     console.error(err.response?.data || err.message);
@@ -23,14 +24,16 @@ const fetchRules = async (req, res) => {
 // UPDATE RULE
 const patchRule = async (req, res) => {
   try {
-    if (!getSession().accessToken) {
+    const session = req.session.salesforce;
+
+    if (!session?.accessToken) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
     const { id } = req.params;
     const { active, fullName } = req.body;
 
-    await updateRule(id, active, fullName);
+    await updateRule(session, id, active, fullName);
 
     res.json({ success: true });
   } catch (err) {

@@ -6,7 +6,9 @@ export default function Dashboard({ status, onLogout, onLoadRules }) {
       <p><b>Instance:</b> {status.instanceUrl}</p>
 
       <div className="actions">
-        <button className="logout" onClick={onLogout}>Logout</button>
+        <button className="logout" onClick={onLogout}>
+  Logout
+</button>
         <button onClick={onLoadRules}>Load Rules</button>
       </div>
     </div>

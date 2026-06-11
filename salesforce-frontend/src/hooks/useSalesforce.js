@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { fetchJSON } from "../api/apiClient";
+import { getStatus, logoutUser } from "../api/authApi";
+import { fetchRules, updateRule } from "../api/rulesApi";
 
 export function useSalesforce() {
   const [status, setStatus] = useState({ loggedIn: false, user: null });
@@ -9,29 +10,30 @@ export function useSalesforce() {
   const [message, setMessage] = useState("");
 
   const changedRules = useMemo(() => {
-    return rules.filter((rule) => {
-      const original = originalRules.find(
-        (originalRule) => originalRule.Id === rule.Id
+    return rules.filter((currentRule) => {
+      const originalRule = originalRules.find(
+        (r) => r.Id === currentRule.Id
       );
-      return original && original.Active !== rule.Active;
+      return originalRule && originalRule.Active !== currentRule.Active;
     });
   }, [rules, originalRules]);
 
-  async function checkStatus() {
+  async function checkAuthStatus() {
     try {
-      const data = await fetchJSON("/status");
+      const data = await getStatus();
       setStatus(data);
     } catch (error) {
       console.error(error);
     }
   }
 
-  function login() {
-    window.location.href = `${import.meta.env.VITE_API_BASE}/login`;
+  async function login(environment) {
+    window.location.href =
+      `${import.meta.env.VITE_API_BASE}/login?env=${environment}`;
   }
 
   async function logout() {
-    await fetchJSON("/logout");
+    await logoutUser();
     setStatus({ loggedIn: false, user: null });
     setRules([]);
     setOriginalRules([]);
@@ -42,7 +44,7 @@ export function useSalesforce() {
     setMessage("");
 
     try {
-      const data = await fetchJSON("/validation-rules");
+      const data = await fetchRules();
       setRules(data.records);
       setOriginalRules(structuredClone(data.records));
       setMessage(`Loaded ${data.records.length} rules`);
@@ -54,22 +56,24 @@ export function useSalesforce() {
   }
 
   function toggleRule(ruleId) {
-    setRules((prevRules) =>
-      prevRules.map((rule) =>
-        rule.Id === ruleId ? { ...rule, Active: !rule.Active } : rule
+    setRules((prev) =>
+      prev.map((rule) =>
+        rule.Id === ruleId
+          ? { ...rule, Active: !rule.Active }
+          : rule
       )
     );
   }
 
   function enableAllRules() {
-    setRules((prevRules) =>
-      prevRules.map((rule) => ({ ...rule, Active: true }))
+    setRules((prev) =>
+      prev.map((rule) => ({ ...rule, Active: true }))
     );
   }
 
   function disableAllRules() {
-    setRules((prevRules) =>
-      prevRules.map((rule) => ({ ...rule, Active: false }))
+    setRules((prev) =>
+      prev.map((rule) => ({ ...rule, Active: false }))
     );
   }
 
@@ -84,19 +88,17 @@ export function useSalesforce() {
 
     try {
       await Promise.all(
-        changedRules.map(async (rule) => {
-          const entityName = rule.EntityDefinition?.QualifiedApiName;
-          const fullName = entityName
-            ? `${entityName}.${rule.ValidationName}`
+        changedRules.map((rule) => {
+          const objectName =
+            rule.EntityDefinition?.QualifiedApiName;
+
+          const fullName = objectName
+            ? `${objectName}.${rule.ValidationName}`
             : rule.ValidationName;
 
-          await fetchJSON(`/validation-rules/${rule.Id}`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              active: rule.Active,
-              fullName,
-            }),
+          return updateRule(rule.Id, {
+            active: rule.Active,
+            fullName,
           });
         })
       );
@@ -111,7 +113,7 @@ export function useSalesforce() {
   }
 
   useEffect(() => {
-    checkStatus();
+    checkAuthStatus();
   }, []);
 
   return {

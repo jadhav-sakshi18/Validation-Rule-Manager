@@ -1,38 +1,33 @@
 const axios = require("axios");
-const { getSession } = require("../utils/session");
 
-const authHeader = () => ({
-  Authorization: `Bearer ${getSession().accessToken}`,
-});
-
-const getRules = async () => {
-  const session = getSession();
-
+const getRules = async (session) => {
   const res = await axios.get(
     `${session.instanceUrl}/services/data/v57.0/tooling/query`,
     {
       params: {
         q: `SELECT Id, ValidationName, Active, Description, ErrorMessage, EntityDefinition.QualifiedApiName FROM ValidationRule`,
       },
-      headers: authHeader(),
+      headers: {
+        Authorization: `Bearer ${session.accessToken}`,
+      },
     }
   );
 
   return res.data.records;
 };
 
-const updateRule = async (id, active, fullName) => {
-  const session = getSession();
-
-  // Fetch existing metadata
+const updateRule = async (session, id, active, fullName) => {
   const current = await axios.get(
     `${session.instanceUrl}/services/data/v57.0/tooling/sobjects/ValidationRule/${id}`,
-    { headers: authHeader() }
+    {
+      headers: {
+        Authorization: `Bearer ${session.accessToken}`,
+      },
+    }
   );
 
   const metadata = current.data.Metadata;
 
-  // Update
   await axios.patch(
     `${session.instanceUrl}/services/data/v57.0/tooling/sobjects/ValidationRule/${id}`,
     {
@@ -42,7 +37,11 @@ const updateRule = async (id, active, fullName) => {
         fullName,
       },
     },
-    { headers: authHeader() }
+    {
+      headers: {
+        Authorization: `Bearer ${session.accessToken}`,
+      },
+    }
   );
 };
 

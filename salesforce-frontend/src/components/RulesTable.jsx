@@ -33,23 +33,21 @@ export default function RulesTable({
             <tr key={rule.Id}>
               <td>{rule.ValidationName}</td>
               <td>{rule.EntityDefinition?.QualifiedApiName}</td>
-
               <td>
-                <span className={`badge ${rule.Active ? "active" : "inactive"}`}>
-                  {rule.Active ? "Active" : "Inactive"}
-                </span>
-              </td>
-
+  <span className={`badge ${rule.Active ? "active" : "inactive"}`}>
+    {rule.Active ? "Active" : "Inactive"}
+  </span>
+</td>
               <td>
-                <label className="switch">
-                  <input
-                    type="checkbox"
-                    checked={rule.Active}
-                    onChange={() => onToggle(rule.Id)}
-                  />
-                  <span className="slider"></span>
-                </label>
-              </td>
+  <label className="switch">
+    <input
+      type="checkbox"
+      checked={rule.Active}
+      onChange={() => onToggle(rule.Id)}
+    />
+    <span className="slider"></span>
+  </label>
+</td>
             </tr>
           ))}
         </tbody>

@@ -1,6 +1,6 @@
-/* ============================= */
+
 /* Global Reset & Theme Variables */
-/* ============================= */
+
 :root {
   --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   --panel-bg: #ffffff;
@@ -19,9 +19,7 @@
   --radius: 12px;
 }
 
-/* ============================= */
 /* Base Reset */
-/* ============================= */
 * {
   box-sizing: border-box;
 }
@@ -33,20 +31,18 @@ body {
   color: var(--text-main);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* ============================= */
 /* Layout */
-/* ============================= */
 .container {
   max-width: 1140px;
   margin: 0 auto;
   padding: 40px 20px;
 }
 
-/* ============================= */
 /* Typography */
-/* ============================= */
+
 h1 {
   text-align: center;
   font-size: 2.3rem;
@@ -60,9 +56,8 @@ h2 {
   margin-bottom: 16px;
 }
 
-/* ============================= */
 /* Panels */
-/* ============================= */
+
 .panel {
   background: var(--panel-bg);
   padding: 26px;
@@ -71,6 +66,8 @@ h2 {
   border: 1px solid var(--border-color);
   box-shadow: 0 8px 20px rgba(0,0,0,0.04);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow-x: auto;
+  will-change: transform;
 }
 
 .panel:hover {
@@ -84,9 +81,7 @@ h2 {
   font-size: 0.9rem;
 }
 
-/* ============================= */
 /* Actions */
-/* ============================= */
 .actions {
   display: flex;
   gap: 10px;
@@ -94,9 +89,7 @@ h2 {
   margin-bottom: 20px;
 }
 
-/* ============================= */
 /* Buttons */
-/* ============================= */
 button {
   font-size: 0.85rem;
   font-weight: 600;
@@ -124,10 +117,15 @@ button:disabled {
   transform: none;
 }
 
+button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
 /* Logout Button */
 button.logout {
-  background: #fee2e2;
-  color: #b91c1c;
+  background: var(--error-bg);
+  color: var(--error-text);
   border: 1px solid #fecaca;
 }
 
@@ -136,7 +134,7 @@ button.logout:hover {
   color: #7f1d1d;
 }
 
-
+/* Login */
 .login-container {
   height: 90vh;
   display: flex;
@@ -146,7 +144,7 @@ button.logout:hover {
   overflow: hidden;
 }
 
-/* Background glow layers */
+/* Background glow */
 .login-container::before,
 .login-container::after {
   content: "";
@@ -154,7 +152,7 @@ button.logout:hover {
   width: 500px;
   height: 500px;
   border-radius: 50%;
-  filter: blur(120px);
+  filter: blur(80px);
   opacity: 0.5;
 }
 
@@ -193,13 +191,6 @@ button.logout:hover {
   box-shadow: 0 40px 80px rgba(0,0,0,0.18);
 }
 
-
-/* Floating animation */
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-}
-
 /* Title */
 .login-card h2 {
   font-size: 1.6rem;
@@ -214,8 +205,10 @@ button.logout:hover {
   margin-bottom: 28px;
 }
 
-/* Button */
+/* Login Button */
 .login-btn {
+  border: none;
+  color: white;
   background: linear-gradient(135deg, #0070d2, #005fb2);
   padding: 13px;
   width: 100%;
@@ -223,6 +216,7 @@ button.logout:hover {
   border-radius: 12px;
   font-weight: 600;
   letter-spacing: 0.02em;
+  cursor: pointer;
 
   transition: all 0.3s ease;
   box-shadow: 0 10px 25px rgba(0,112,210,0.3);
@@ -233,50 +227,15 @@ button.logout:hover {
   box-shadow: 0 15px 35px rgba(0,112,210,0.45);
 }
 
-/* Divider */
-.login-divider {
-  margin: 22px 0 10px;
-  position: relative;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
-.login-divider::before,
-.login-divider::after {
-  content: "";
-  position: absolute;
-  height: 1px;
-  width: 30%;
-  background: var(--border-color);
-  top: 50%;
-}
-
-.login-divider::before {
-  left: 0;
-}
-
-.login-divider::after {
-  right: 0;
-}
-
 /* Footer */
 .login-footer {
-  margin-top: 10px;
+  margin-top: 16px;
   font-size: 0.75rem;
   color: var(--text-muted);
   opacity: 0.8;
 }
 
-/* Footer text */
-.login-footer {
-  margin-top: 16px;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
-/* ============================= */
 /* Table */
-/* ============================= */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -305,9 +264,7 @@ tr:hover {
   background: #f8fafc;
 }
 
-/* ============================= */
 /* Badge */
-/* ============================= */
 .badge {
   padding: 4px 10px;
   border-radius: 999px;
@@ -325,9 +282,7 @@ tr:hover {
   color: var(--error-text);
 }
 
-/* ============================= */
-/* Toggle Switch (FIXED) */
-/* ============================= */
+/* Toggle Switch */
 .switch {
   position: relative;
   display: inline-block;
@@ -335,7 +290,6 @@ tr:hover {
   height: 22px;
 }
 
-/* Hide checkbox but keep clickable */
 .switch input {
   position: absolute;
   opacity: 0;
@@ -343,17 +297,15 @@ tr:hover {
   height: 0;
 }
 
-/* Track */
 .slider {
   position: absolute;
   inset: 0;
   background: #cbd5e1;
   border-radius: 999px;
   cursor: pointer;
-  transition: 0.3s;
+  transition: background 0.25s ease;
 }
 
-/* Knob */
 .slider::before {
   content: "";
   position: absolute;
@@ -363,10 +315,9 @@ tr:hover {
   bottom: 2px;
   background: white;
   border-radius: 50%;
-  transition: 0.3s;
+  transition: transform 0.25s ease;
 }
 
-/* Active */
 .switch input:checked + .slider {
   background: var(--primary);
 }
@@ -375,9 +326,7 @@ tr:hover {
   transform: translateX(18px);
 }
 
-/* ============================= */
 /* Messages */
-/* ============================= */
 .message {
   margin: 15px 0;
   padding: 12px 16px;
@@ -390,4 +339,23 @@ tr:hover {
 .message.status-loading {
   background: #f0f9ff;
   border-left-color: #0284c7;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 20px 12px;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  th, td {
+    padding: 10px;
+  }
+
+  table {
+    font-size: 0.8rem;
+  }
 }

@@ -2,24 +2,29 @@ export default function Login({ onLogin }) {
   return (
     <div className="login-container">
       <div className="login-card">
-        
-
         <h2>Welcome Back</h2>
 
         <p className="login-subtitle">
-          Manage your Salesforce validation rules effortlessly
+          Choose your Salesforce environment
         </p>
 
-        <button className="login-btn" onClick={onLogin}>
-          Continue with Salesforce
+        <button
+          className="login-btn"
+          onClick={() => onLogin("production")}
+        >
+          Login with Production
         </button>
 
-        <div className="login-divider">
-          <span>Secure OAuth Access</span>
-        </div>
+        <button
+          className="login-btn"
+          style={{ marginTop: "10px", background: "#22c55e" }}
+          onClick={() => onLogin("sandbox")}
+        >
+          Login with Sandbox
+        </button>
 
         <p className="login-footer">
-          Your data stays safe. No credentials stored.
+          Secure OAuth Login
         </p>
       </div>
     </div>
