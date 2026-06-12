@@ -33,10 +33,17 @@ export function useSalesforce() {
   }
 
   async function logout() {
-    await logoutUser();
-    setStatus({ loggedIn: false, user: null });
-    setRules([]);
-    setOriginalRules([]);
+    try {
+      await logoutUser();
+    } catch (error) {
+      console.error("Logout request failed:", error);
+    } finally {
+      // Clear all state values so the application returns to a clean default state
+      setStatus({ loggedIn: false, user: null });
+      setRules([]);
+      setOriginalRules([]);
+      setMessage(""); // 👈 FIX: Clears "Changes deployed successfully!" alert on logout
+    }
   }
 
   async function loadRules() {

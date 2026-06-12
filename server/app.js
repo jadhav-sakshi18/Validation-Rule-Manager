@@ -8,14 +8,24 @@ const ruleController = require("./controllers/ruleController");
 
 const app = express();
 
+// 1. Detect environment
+const isProduction = process.env.NODE_ENV === "production";
+
+// 2. If behind a reverse proxy (Heroku, Render, AWS ELB) in production, trust it
+if (isProduction) {
+  app.set("trust proxy", 1);
+}
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: false,
-      sameSite: "lax",
+      // CRITICAL FIX: 'secure: true' requires HTTPS. Turning it off for localhost development.
+      secure: isProduction,
+      // 'lax' allows the cookie to be sent back safely after the Salesforce redirect on localhost
+      sameSite: isProduction ? "none" : "lax",
     },
   })
 );
