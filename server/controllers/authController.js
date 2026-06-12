@@ -43,6 +43,11 @@ const login = (req, res) => {
 
 const callback = async (req, res) => {
   try {
+    if (req.query.error) {
+      console.error("OAuth Error:", req.query);
+      return res.status(400).send(req.query.error_description);
+    }
+
     if (!req.query.code) {
       return res.status(400).send("Missing code");
     }
@@ -50,6 +55,7 @@ const callback = async (req, res) => {
     // Process the OAuth callback and attach tokens to the session
     await handleCallback(req.query.code, req);
 
+<<<<<<< HEAD
     // Explicitly save the session and wait for it to complete
     await new Promise((resolve, reject) => {
       req.session.save((err) => {
@@ -65,6 +71,20 @@ const callback = async (req, res) => {
 
   } catch (error) {
     console.error("Auth error:", error); // Good practice to log the error
+=======
+    await new Promise((resolve, reject) => {
+      req.session.save((err) => (err ? reject(err) : resolve()));
+    });
+
+<<<<<<< HEAD
+=======
+    // ✅ IMPORTANT
+>>>>>>> 5b21aa4 (Fix Salesforce OAuth session issue and update callback handling)
+    res.redirect(process.env.FRONTEND_URL);
+
+  } catch (err) {
+    console.error("FULL ERROR:", err.response?.data || err.message);
+>>>>>>> 43b8ce6d1bb1b84a0464bfbb35c17b30f678dde9
     res.status(500).send("Authentication failed");
   }
 };
