@@ -53,7 +53,7 @@ const callback = async (req, res) => {
       req.session.save((err) => (err ? reject(err) : resolve()));
     });
 
-    res.redirect(process.env.FRONTEND_URL);
+    //res.redirect(process.env.FRONTEND_URL);
 
   } catch {
     res.status(500).send("Authentication failed");
