@@ -43,14 +43,26 @@ const login = (req, res) => {
 
 const callback = async (req, res) => {
   try {
+
+    if (req.query.error) {
+      console.error("OAuth Error:", req.query);
+      return res.status(400).send(req.query.error_description);
+    }
+
     if (!req.query.code) {
       return res.status(400).send("Missing code");
     }
 
-    await handleCallback(req.query.code, req);
-    res.redirect(process.env.FRONTEND_URL);
+        await handleCallback(req.query.code, req);
 
-  } catch {
+    await new Promise((resolve, reject) => {
+      req.session.save((err) => (err ? reject(err) : resolve()));
+    });
+
+    // Redirect to frontend
+    //res.redirect(process.env.FRONTEND_URL);
+
+  } catch (err) {
     res.status(500).send("Authentication failed");
   }
 };
