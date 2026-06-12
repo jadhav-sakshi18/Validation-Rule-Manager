@@ -47,14 +47,27 @@ const callback = async (req, res) => {
       return res.status(400).send("Missing code");
     }
 
+    // Process the OAuth callback and attach tokens to the session
     await handleCallback(req.query.code, req);
+
+    // Explicitly save the session and wait for it to complete
+    await new Promise((resolve, reject) => {
+      req.session.save((err) => {
+        if (err) {
+          return reject(err);
+        }
+        resolve();
+      });
+    });
+
+    // Safe to redirect now that the session store has finished writing
     res.redirect(process.env.FRONTEND_URL);
 
-  } catch {
+  } catch (error) {
+    console.error("Auth error:", error); // Good practice to log the error
     res.status(500).send("Authentication failed");
   }
 };
-
 const status = (req, res) => {
   const session = req.session.salesforce;
 
