@@ -21,17 +21,6 @@ function App() {
     deployChanges,
   } = useSalesforce();
 
-  // FIX: Keep the clean session verification banner active while checking backend credentials. 
-  // Prevents the login screen form flashing up layout transitions incorrectly.
-  if (loading && !status.loggedIn && rules.length === 0) {
-    return (
-      <div className="container" style={{ textAlign: "center", marginTop: "100px" }}>
-        <h1>Salesforce Validation Rule Manager</h1>
-        <p className="message status-loading">Verifying session... Please wait.</p>
-      </div>
-    );
-  }
-
   return (
     <div className="container">
       <h1>Salesforce Validation Rule Manager</h1>
@@ -46,11 +35,7 @@ function App() {
         />
       )}
 
-      {/* Handles background actions cleanly without breaking core conditional block layouts */}
-      {loading && rules.length > 0 && (
-        <p className="message status-loading">Processing...</p>
-      )}
-      
+      {loading && <p className="message status-loading">Processing...</p>}
       {message && <p className="message">{message}</p>}
 
       {rules.length > 0 && (

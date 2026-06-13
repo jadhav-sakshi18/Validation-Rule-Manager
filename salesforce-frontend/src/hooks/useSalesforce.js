@@ -6,16 +6,12 @@ export function useSalesforce() {
   const [status, setStatus] = useState({ loggedIn: false, user: null });
   const [rules, setRules] = useState([]);
   const [originalRules, setOriginalRules] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-  
-  // FIX: Start loading as TRUE so the UI waits for checkAuthStatus() to finish
-  const [loading, setLoading] = useState(true);
 
   const changedRules = useMemo(() => {
     return rules.filter((currentRule) => {
-      const originalRule = originalRules.find(
-        (r) => r.Id === currentRule.Id
-      );
+      const originalRule = originalRules.find((r) => r.Id === currentRule.Id);
       return originalRule && originalRule.Active !== currentRule.Active;
     });
   }, [rules, originalRules]);
@@ -26,28 +22,19 @@ export function useSalesforce() {
       setStatus(data);
     } catch (error) {
       console.error(error);
-    } finally {
-      // FIX: Ensure loading ends whether the check succeeds or fails
-      setLoading(false);
     }
   }
 
-  async function login(environment) {
-    window.location.href =
-      `${import.meta.env.VITE_API_BASE}/login?env=${environment}`;
+  function login(environment) {
+    window.location.href = `${import.meta.env.VITE_API_BASE}/login?env=${environment}`;
   }
 
   async function logout() {
-    try {
-      await logoutUser();
-    } catch (error) {
-      console.error("Logout request failed:", error);
-    } finally {
-      setStatus({ loggedIn: false, user: null });
-      setRules([]);
-      setOriginalRules([]);
-      setMessage(""); 
-    }
+    await logoutUser();
+    sessionStorage.removeItem("authToken");
+    setStatus({ loggedIn: false, user: null });
+    setRules([]);
+    setOriginalRules([]);
   }
 
   async function loadRules() {
@@ -69,23 +56,17 @@ export function useSalesforce() {
   function toggleRule(ruleId) {
     setRules((prev) =>
       prev.map((rule) =>
-        rule.Id === ruleId
-          ? { ...rule, Active: !rule.Active }
-          : rule
+        rule.Id === ruleId ? { ...rule, Active: !rule.Active } : rule
       )
     );
   }
 
   function enableAllRules() {
-    setRules((prev) =>
-      prev.map((rule) => ({ ...rule, Active: true }))
-    );
+    setRules((prev) => prev.map((rule) => ({ ...rule, Active: true })));
   }
 
   function disableAllRules() {
-    setRules((prev) =>
-      prev.map((rule) => ({ ...rule, Active: false }))
-    );
+    setRules((prev) => prev.map((rule) => ({ ...rule, Active: false })));
   }
 
   function rollbackChanges() {
@@ -100,20 +81,13 @@ export function useSalesforce() {
     try {
       await Promise.all(
         changedRules.map((rule) => {
-          const objectName =
-            rule.EntityDefinition?.QualifiedApiName;
-
+          const objectName = rule.EntityDefinition?.QualifiedApiName;
           const fullName = objectName
             ? `${objectName}.${rule.ValidationName}`
             : rule.ValidationName;
-
-          return updateRule(rule.Id, {
-            active: rule.Active,
-            fullName,
-          });
+          return updateRule(rule.Id, { active: rule.Active, fullName });
         })
       );
-
       await loadRules();
       setMessage("Changes deployed successfully!");
     } catch (error) {
@@ -124,6 +98,14 @@ export function useSalesforce() {
   }
 
   useEffect(() => {
+    // Read authToken from URL after OAuth redirect and store it
+    const params = new URLSearchParams(window.location.search);
+    const authToken = params.get("authToken");
+    if (authToken) {
+      sessionStorage.setItem("authToken", authToken);
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+
     checkAuthStatus();
   }, []);
 
