@@ -1,4 +1,6 @@
-require("dotenv").config();
+
+const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, ".env") });
 const express = require("express");
 const cors = require("cors");
 const session = require("express-session");
@@ -8,13 +10,9 @@ const ruleController = require("./controllers/ruleController");
 
 const app = express();
 
-// 1. Detect environment
 const isProduction = process.env.NODE_ENV === "production";
 
-// 2. If behind a reverse proxy (Heroku, Render, AWS ELB) in production, trust it
-if (isProduction) {
-  app.set("trust proxy", 1);
-}
+app.set("trust proxy", 1);
 
 app.use(
   session({
@@ -22,10 +20,9 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      // CRITICAL FIX: 'secure: true' requires HTTPS. Turning it off for localhost development.
       secure: isProduction,
-      // 'lax' allows the cookie to be sent back safely after the Salesforce redirect on localhost
       sameSite: isProduction ? "none" : "lax",
+      httpOnly: true,
     },
   })
 );

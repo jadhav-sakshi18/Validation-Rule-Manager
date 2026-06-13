@@ -6,8 +6,10 @@ export function useSalesforce() {
   const [status, setStatus] = useState({ loggedIn: false, user: null });
   const [rules, setRules] = useState([]);
   const [originalRules, setOriginalRules] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  
+  // FIX: Start loading as TRUE so the UI waits for checkAuthStatus() to finish
+  const [loading, setLoading] = useState(true);
 
   const changedRules = useMemo(() => {
     return rules.filter((currentRule) => {
@@ -24,6 +26,9 @@ export function useSalesforce() {
       setStatus(data);
     } catch (error) {
       console.error(error);
+    } finally {
+      // FIX: Ensure loading ends whether the check succeeds or fails
+      setLoading(false);
     }
   }
 
@@ -38,11 +43,10 @@ export function useSalesforce() {
     } catch (error) {
       console.error("Logout request failed:", error);
     } finally {
-      // Clear all state values so the application returns to a clean default state
       setStatus({ loggedIn: false, user: null });
       setRules([]);
       setOriginalRules([]);
-      setMessage(""); // 👈 FIX: Clears "Changes deployed successfully!" alert on logout
+      setMessage(""); 
     }
   }
 

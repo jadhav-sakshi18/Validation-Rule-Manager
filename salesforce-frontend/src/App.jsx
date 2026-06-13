@@ -21,9 +21,8 @@ function App() {
     deployChanges,
   } = useSalesforce();
 
-  // FIX: If the initial handshake/status check with the backend is still running,
-  // show a clean loading screen instead of flashing the login layout.
-  // (Assuming your useSalesforce hook handles the initial status loading via `loading`)
+  // FIX: Keep the clean session verification banner active while checking backend credentials. 
+  // Prevents the login screen form flashing up layout transitions incorrectly.
   if (loading && !status.loggedIn && rules.length === 0) {
     return (
       <div className="container" style={{ textAlign: "center", marginTop: "100px" }}>
@@ -47,7 +46,7 @@ function App() {
         />
       )}
 
-      {/* This handles background actions like fetching rules or deploying */}
+      {/* Handles background actions cleanly without breaking core conditional block layouts */}
       {loading && rules.length > 0 && (
         <p className="message status-loading">Processing...</p>
       )}

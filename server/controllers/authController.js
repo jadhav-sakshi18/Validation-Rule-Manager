@@ -52,8 +52,11 @@ const callback = async (req, res) => {
       return res.status(400).send("Missing code");
     }
 
+    // FIX: Extract loginBase from session to ensure token exchange targets the correct endpoint (prevents 503)
+    const loginBase = req.session.loginBase || "https://login.salesforce.com";
+
     // Process the OAuth callback and attach tokens to the session
-    await handleCallback(req.query.code, req);
+    await handleCallback(req.query.code, req, loginBase);
 
     // Explicitly save the session and wait for it to complete
     await new Promise((resolve, reject) => {
