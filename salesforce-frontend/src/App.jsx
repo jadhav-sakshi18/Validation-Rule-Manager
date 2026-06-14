@@ -22,7 +22,7 @@ function App() {
     authLoading,
   } = useSalesforce();
 
-  // ✅ block UI until auth resolved
+  // ✅ Block UI until auth check completes
   if (authLoading || status === null) {
     return (
       <div className="container">
@@ -39,26 +39,31 @@ function App() {
       {!status.loggedIn ? (
         <Login onLogin={login} />
       ) : (
-        <Dashboard
-          status={status}
-          onLogout={logout}
-          onLoadRules={loadRules}
-        />
-      )}
+        <>
+          <Dashboard
+            status={status}
+            onLogout={logout}
+            onLoadRules={loadRules}
+          />
 
-      {loading && <p className="message status-loading">Processing...</p>}
-      {message && <p className="message">{message}</p>}
+          {/* ✅ Show messages ONLY when logged in */}
+          {loading && (
+            <p className="message status-loading">Processing...</p>
+          )}
+          {message && <p className="message">{message}</p>}
 
-      {rules.length > 0 && (
-        <RulesTable
-          rules={rules}
-          onToggle={toggleRule}
-          onEnableAll={enableAllRules}
-          onDisableAll={disableAllRules}
-          onRollback={rollbackChanges}
-          onDeploy={deployChanges}
-          changedCount={changedRules.length}
-        />
+          {rules.length > 0 && (
+            <RulesTable
+              rules={rules}
+              onToggle={toggleRule}
+              onEnableAll={enableAllRules}
+              onDisableAll={disableAllRules}
+              onRollback={rollbackChanges}
+              onDeploy={deployChanges}
+              changedCount={changedRules.length}
+            />
+          )}
+        </>
       )}
     </div>
   );

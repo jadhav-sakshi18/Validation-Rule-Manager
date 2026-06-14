@@ -3,12 +3,12 @@ import { getStatus, logoutUser } from "../api/authApi";
 import { fetchRules, updateRule } from "../api/rulesApi";
 
 export function useSalesforce() {
-  const [status, setStatus] = useState(null); // ✅ start as null
+  const [status, setStatus] = useState(null); 
   const [rules, setRules] = useState([]);
   const [originalRules, setOriginalRules] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const [authLoading, setAuthLoading] = useState(true); // ✅
+  const [authLoading, setAuthLoading] = useState(true); 
 
   const changedRules = useMemo(() => {
     return rules.filter((currentRule) => {
@@ -34,13 +34,17 @@ export function useSalesforce() {
   }
 
   async function logout() {
-    await logoutUser();
-    sessionStorage.removeItem("authToken");
-    setStatus({ loggedIn: false, user: null });
-    setRules([]);
-    setOriginalRules([]);
-  }
+  await logoutUser();
 
+  sessionStorage.removeItem("authToken");
+
+  setStatus({ loggedIn: false, user: null });
+  setRules([]);
+  setOriginalRules([]);
+  setMessage("");       
+  setLoading(false);    
+
+}
   async function loadRules() {
     setLoading(true);
     setMessage("");
@@ -106,13 +110,13 @@ export function useSalesforce() {
     const authToken = params.get("authToken");
 
     if (authToken) {
-      // ✅ store token FIRST
+      // store token FIRST
       sessionStorage.setItem("authToken", authToken);
 
-      // ✅ clean URL
+      // clean URL
       window.history.replaceState({}, "", window.location.pathname);
 
-      // ✅ prevent flicker (optimistic login)
+      // revent flicker (optimistic login)
       setStatus({ loggedIn: true });
     }
 
