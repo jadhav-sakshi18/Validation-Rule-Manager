@@ -11,6 +11,10 @@ export async function apiRequest(endpoint, options = {}) {
   const response = await fetch(`${API_BASE}${endpoint}`, {
     ...options,
     headers,
+<<<<<<< HEAD
+=======
+    credentials: "include",
+>>>>>>> 007eb45afc7455d06c1b616ebb94cdd63367660a
   });
 
   const data = await response.json().catch(() => ({}));

@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> 007eb45afc7455d06c1b616ebb94cdd63367660a
 const path = require("path");
 require("dotenv").config({ path: path.join(__dirname, ".env") });
 const express = require("express");
@@ -9,12 +13,27 @@ const ruleController = require("./controllers/ruleController");
 
 const app = express();
 
+<<<<<<< HEAD
+=======
+const isProduction = process.env.NODE_ENV === "production";
+
+app.set("trust proxy", 1);
+
+>>>>>>> 007eb45afc7455d06c1b616ebb94cdd63367660a
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+<<<<<<< HEAD
     cookie: { httpOnly: true },
+=======
+    cookie: {
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
+      httpOnly: true,
+    },
+>>>>>>> 007eb45afc7455d06c1b616ebb94cdd63367660a
   })
 );
 
@@ -39,4 +58,8 @@ app.patch("/validation-rules/:id", ruleController.patchRule);
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
+<<<<<<< HEAD
 });
+=======
+});
+>>>>>>> 007eb45afc7455d06c1b616ebb94cdd63367660a
