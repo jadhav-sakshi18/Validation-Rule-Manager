@@ -19,7 +19,18 @@ function App() {
     disableAllRules,
     rollbackChanges,
     deployChanges,
+    authLoading,
   } = useSalesforce();
+
+  // ✅ block UI until auth resolved
+  if (authLoading || status === null) {
+    return (
+      <div className="container">
+        <h1>Salesforce Validation Rule Manager</h1>
+        <p className="message status-loading">Checking authentication...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container">

@@ -3,11 +3,12 @@ import { getStatus, logoutUser } from "../api/authApi";
 import { fetchRules, updateRule } from "../api/rulesApi";
 
 export function useSalesforce() {
-  const [status, setStatus] = useState({ loggedIn: false, user: null });
+  const [status, setStatus] = useState(null); // ✅ start as null
   const [rules, setRules] = useState([]);
   const [originalRules, setOriginalRules] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [authLoading, setAuthLoading] = useState(true); // ✅
 
   const changedRules = useMemo(() => {
     return rules.filter((currentRule) => {
@@ -22,6 +23,9 @@ export function useSalesforce() {
       setStatus(data);
     } catch (error) {
       console.error(error);
+      setStatus({ loggedIn: false });
+    } finally {
+      setAuthLoading(false);
     }
   }
 
@@ -98,12 +102,18 @@ export function useSalesforce() {
   }
 
   useEffect(() => {
-    // Read authToken from URL after OAuth redirect and store it
     const params = new URLSearchParams(window.location.search);
     const authToken = params.get("authToken");
+
     if (authToken) {
+      // ✅ store token FIRST
       sessionStorage.setItem("authToken", authToken);
+
+      // ✅ clean URL
       window.history.replaceState({}, "", window.location.pathname);
+
+      // ✅ prevent flicker (optimistic login)
+      setStatus({ loggedIn: true });
     }
 
     checkAuthStatus();
@@ -123,5 +133,6 @@ export function useSalesforce() {
     disableAllRules,
     rollbackChanges,
     deployChanges,
+    authLoading,
   };
 }
