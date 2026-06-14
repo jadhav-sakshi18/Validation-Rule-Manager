@@ -11,7 +11,6 @@ export async function apiRequest(endpoint, options = {}) {
   const response = await fetch(`${API_BASE}${endpoint}`, {
     ...options,
     headers,
-    credentials: "include",
   });
 
   const data = await response.json().catch(() => ({}));

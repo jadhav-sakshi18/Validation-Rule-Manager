@@ -1,4 +1,4 @@
-const { handleCallback } = require("../services/authService");
+const { handleCallback, getSession, deleteToken } = require("../services/authService");
 const crypto = require("crypto");
 
 const login = (req, res) => {
@@ -30,12 +30,12 @@ const login = (req, res) => {
 
       res.redirect(
         `${loginBase}/services/oauth2/authorize?response_type=code` +
-          `&client_id=${process.env.CLIENT_ID}` +
-          `&redirect_uri=${process.env.REDIRECT_URI}` +
-          `&code_challenge=${codeChallenge}` +
-          `&code_challenge_method=S256` +
-          `&prompt=login` +
-          `&scope=full refresh_token`
+        `&client_id=${process.env.CLIENT_ID}` +
+        `&redirect_uri=${process.env.REDIRECT_URI}` +
+        `&code_challenge=${codeChallenge}` +
+        `&code_challenge_method=S256` +
+        `&prompt=login` +
+        `&scope=full refresh_token`
       );
     });
   });
@@ -43,53 +43,34 @@ const login = (req, res) => {
 
 const callback = async (req, res) => {
   try {
-    if (req.query.error) {
-      console.error("OAuth Error:", req.query);
-      return res.status(400).send(req.query.error_description);
-    }
-
     if (!req.query.code) {
       return res.status(400).send("Missing code");
     }
 
-    const loginBase = req.session.loginBase || "https://login.salesforce.com";
+    const token = await handleCallback(req.query.code, req);
+    res.redirect(`${process.env.FRONTEND_URL}?authToken=${token}`);
 
-    await handleCallback(req.query.code, req, loginBase);
-
-    await new Promise((resolve, reject) => {
-      req.session.save((err) => {
-        if (err) {
-          return reject(err);
-        }
-        resolve();
-      });
-    });
-
-    res.redirect(process.env.FRONTEND_URL);
-
-  } catch (error) {
-    console.error("FULL ERROR:", error.response?.data || error.message);
+  } catch (err) {
+    console.error("Callback error:", err.message);
     res.status(500).send("Authentication failed");
   }
 };
 
 const status = (req, res) => {
-  const session = req.session.salesforce;
+  const token = req.headers["x-auth-token"];
+  const session = token ? getSession(token) : null;
 
   res.json({
-    loggedIn: !!session?.accessToken,
+    loggedIn: !!(session?.accessToken),
     instanceUrl: session?.instanceUrl,
     user: session?.user,
   });
 };
 
 const logout = (req, res) => {
-  req.session.destroy((error) => {
-    if (error) {
-      return res.status(500).send("Logout failed");
-    }
-    res.json({ success: true });
-  });
+  const token = req.headers["x-auth-token"];
+  if (token) deleteToken(token);
+  res.json({ success: true });
 };
 
 module.exports = {

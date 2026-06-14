@@ -9,20 +9,12 @@ const ruleController = require("./controllers/ruleController");
 
 const app = express();
 
-const isProduction = process.env.NODE_ENV === "production";
-
-app.set("trust proxy", 1);
-
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: {
-      secure: isProduction,
-      sameSite: isProduction ? "none" : "lax",
-      httpOnly: true,
-    },
+    cookie: { httpOnly: true },
   })
 );
 

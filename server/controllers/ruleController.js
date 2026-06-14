@@ -1,9 +1,10 @@
 const { getRules, updateRule } = require("../services/ruleService");
+const { getSession } = require("../services/authService");
 
-// GET RULES
 const fetchRules = async (req, res) => {
   try {
-    const session = req.session.salesforce;
+    const token = req.headers["x-auth-token"];
+    const session = token ? getSession(token) : null;
 
     if (!session?.accessToken) {
       return res.status(401).json({ message: "Unauthorized" });
@@ -19,10 +20,10 @@ const fetchRules = async (req, res) => {
   }
 };
 
-// UPDATE RULE
 const patchRule = async (req, res) => {
   try {
-    const session = req.session.salesforce;
+    const token = req.headers["x-auth-token"];
+    const session = token ? getSession(token) : null;
 
     if (!session?.accessToken) {
       return res.status(401).json({ message: "Unauthorized" });
